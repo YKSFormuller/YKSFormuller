@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "662058197741",
+    "firebase_url": "https://yksformuller-5aed0.firebaseio.com",
+    "project_id": "yksformuller-5aed0",
+    "storage_bucket": "yksformuller-5aed0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662058197741:android:da9797d3760541db",
+        "android_client_info": {
+          "package_name": "com.yksformuller"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "662058197741-h57actbkle99vd6765id3rurtqgerhu8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yksformuller",
+            "certificate_hash": "3dfad329ab0ff90c42d394d841cc78f8307a4655"
+          }
+        },
+        {
+          "client_id": "662058197741-5s7jvvc6mbbvdsbh0iqq4sv3fmbkj827.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCr5FspGj9so1Zau14UYgycXrmE6o2Dz7M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "662058197741-5s7jvvc6mbbvdsbh0iqq4sv3fmbkj827.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
