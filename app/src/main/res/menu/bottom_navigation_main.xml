@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_math"
+        android:enabled="true"
+        android:icon="@drawable/calculator"
+        android:title="Matematik"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_geo"
+        android:enabled="true"
+        android:icon="@drawable/shapes"
+        android:title="Geometri"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_download"
+        android:enabled="true"
+        android:icon="@drawable/downloadbutton"
+        android:title="İndirilen Formüller"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_bell"
+        android:enabled="true"
+        android:icon="@drawable/bell"
+        android:title="YKS Sayaç"
+        app:showAsAction="ifRoom" />
+</menu>
