@@ -26,7 +26,9 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.google.firebase:firebase-database:11.8.0'
     implementation 'com.android.support:support-v4:27.1.1'
-    compile("com.jakewharton:butterknife:8.5.1")
+    implementation 'com.jakewharton:butterknife:8.5.1'
+    implementation 'co.dift.ui.swipetoaction:library:1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
     annotationProcessor "com.jakewharton:butterknife-compiler:8.5.1"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

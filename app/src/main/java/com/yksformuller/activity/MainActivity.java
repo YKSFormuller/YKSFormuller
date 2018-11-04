@@ -1,6 +1,5 @@
 package com.yksformuller.activity;
 
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         //bottom tabbar click dinleniyor.
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            public boolean onNavigationItemSelected(MenuItem item) {
                 if(item.getItemId()==R.id.action_math){
                     fragment=new MathFragment();
                     fragment_name="Matematik";
