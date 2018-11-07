@@ -2,6 +2,8 @@ package com.yksformuller.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,8 +27,9 @@ public class GeoFragment extends Fragment  implements View.OnClickListener,ItemC
     FirebaseDatabase db;
     FormulaAdapter adapter;
     RecyclerView rvGeoList;
-    List<model.Formula> listFormula = new ArrayList<model.Formula>();
-
+    Fragment fragment = null;
+    String fragment_name;
+    Bundle args;
     List<String>geoSubjectList=new ArrayList<String>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,8 +96,24 @@ public class GeoFragment extends Fragment  implements View.OnClickListener,ItemC
 
     @Override
     public void onClick(View view, int position) {
-
-        String s = geoSubjectList.get(position);
-        Toast.makeText(getActivity().getApplicationContext(), s, Toast.LENGTH_SHORT).show();
+        fragment=new SubjectFragment();
+        fragment_name="Konular";
+        args=new Bundle();
+        args.putString("ders","geometri");
+        args.putString("konu",geoSubjectList.get(position));
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        //fragment değişimi gerçekleştiriliyor.
+        transaction.replace(R.id.container, fragment).commit();
+        //stackteki fragment sayısı
+        int count = getActivity().getSupportFragmentManager().getBackStackEntryCount();
+        //stackte birden fazla fragment birikmesini önlüyor.
+        if(count!=0){
+            FragmentManager.BackStackEntry backStackEntry = getActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            if (backStackEntry.getName().contains(fragment_name)) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        }
     }
 }

@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -32,8 +34,9 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
     FirebaseDatabase db;
     FormulaAdapter adapter;
     RecyclerView rvMmathList;
-    List<Formula> listFormula = new ArrayList<Formula>();
-
+    Fragment fragment = null;
+    String fragment_name;
+    Bundle args;
     List<String> mathSubjectList = new ArrayList<String>();
 
     SwipeToAction swipeToAction;
@@ -128,10 +131,25 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
     @Override
     public void onClick(View view, int position) {
-
-        String s = mathSubjectList.get(position);
-        Toast.makeText(getActivity().getApplicationContext(), s, Toast.LENGTH_SHORT).show();
-
+        fragment=new SubjectFragment();
+        fragment_name="Konular";
+        args=new Bundle();
+        args.putString("ders","matematik");
+        args.putString("konu",mathSubjectList.get(position));
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        //fragment değişimi gerçekleştiriliyor.
+        transaction.replace(R.id.container, fragment).commit();
+        //stackteki fragment sayısı
+        int count = getActivity().getSupportFragmentManager().getBackStackEntryCount();
+        //stackte birden fazla fragment birikmesini önlüyor.
+        if(count!=0){
+            FragmentManager.BackStackEntry backStackEntry = getActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            if (backStackEntry.getName().contains(fragment_name)) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        }
     }
 
     private void displaySnackbar(String text, String actionName, View.OnClickListener action) {
