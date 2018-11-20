@@ -1,18 +1,17 @@
 package com.yksformuller.fragment;
 
-import android.graphics.Color;
+import android.graphics.Canvas;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.SearchView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,14 +21,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.yksformuller.R;
 import com.yksformuller.adapter.FormulaAdapter;
 import com.yksformuller.Interface.ItemClickListener;
+import com.yksformuller.model.SwipeController;
+import com.yksformuller.model.SwipeControllerActions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import co.dift.ui.SwipeToAction;
 import model.Formula;
 
-public class MathFragment extends Fragment implements View.OnClickListener, ItemClickListener {
+public class MathFragment extends Fragment implements View.OnClickListener, ItemClickListener,SearchView.OnQueryTextListener {
 
     FirebaseDatabase db;
     FormulaAdapter adapter;
@@ -38,14 +38,17 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
     String fragment_name;
     Bundle args;
     List<String> mathSubjectList = new ArrayList<String>();
+    SearchView searchView;
+    SwipeController swipeController = null;
 
-    SwipeToAction swipeToAction;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseDatabase.getInstance();
 
         createSubjectList();
+
+
     }
 
     @Override
@@ -54,44 +57,59 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         View view = inflater.inflate(R.layout.fragment_math, parent, false);
 
         rvMmathList = (RecyclerView) view.findViewById(R.id.mathList);
+        searchView = (SearchView) view.findViewById(R.id.searchViewMath);
 
-     //   rvMmathList.setHasFixedSize(true);
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
 
-        //adapter = new FormulaAdapter(this.getActivity(), listFormula);
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                // Row is swiped from recycler view
+                // remove it from adapter
+            }
+
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                // view the background view
+            }
+        };
+
+
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvMmathList);
+
+
         adapter = new FormulaAdapter(this.getActivity(), mathSubjectList);
 
         rvMmathList.setAdapter(adapter);
-
-//        swipeToAction=new SwipeToAction(rvMmathList, new SwipeToAction.SwipeListener() {
-//            @Override
-//            public boolean swipeLeft(Object itemData) {
-//                Toast.makeText(getActivity().getApplicationContext(), "swipeLeft", Toast.LENGTH_SHORT).show();
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean swipeRight(Object itemData) {
-//                return false;
-//            }
-//
-//            @Override
-//            public void onClick(Object itemData) {
-//
-//            }
-//
-//            @Override
-//            public void onLongClick(Object itemData) {
-//
-//            }
-//        });
-
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rvMmathList.setLayoutManager(linearLayoutManager);
 
-        adapter.setClickListener(this);
 
+        swipeController = new SwipeController(new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                // adapter.players.remove(position);
+                adapter.notifyItemRemoved(position);
+                adapter.notifyItemRangeChanged(position, adapter.getItemCount());
+            }
+        });
+
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
+        itemTouchhelper.attachToRecyclerView(rvMmathList);
+
+        rvMmathList.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                swipeController.onDraw(c);
+            }
+        });
+        searchView.setOnQueryTextListener(this);
+        adapter.setClickListener(this);
 
         return view;
 
@@ -105,11 +123,8 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot formulas : dataSnapshot.getChildren()) {
-//                    String formulaName=formulas.getValue(Formula.class).getFormulAdi();
                     String subjectName = formulas.getValue(Formula.class).getKonuAdi();
-//                    String photoUrl=formulas.getValue(Formula.class).getResimurl();
-//                    Formula formula=new Formula(formulaName,subjectName,photoUrl);
-//                    listFormula.add(formula);
+
                     if (!mathSubjectList.contains(subjectName))
                         mathSubjectList.add(subjectName);
 
@@ -131,11 +146,13 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
     @Override
     public void onClick(View view, int position) {
-        fragment=new SubjectFragment();
-        fragment_name="Konular";
-        args=new Bundle();
-        args.putString("ders","matematik");
-        args.putString("konu",mathSubjectList.get(position));
+
+
+        fragment = new SubjectFragment();
+        fragment_name = "Konular";
+        args = new Bundle();
+        args.putString("ders", "matematik");
+        args.putString("konu", mathSubjectList.get(position));
         fragment.setArguments(args);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -144,7 +161,7 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         //stackteki fragment sayısı
         int count = getActivity().getSupportFragmentManager().getBackStackEntryCount();
         //stackte birden fazla fragment birikmesini önlüyor.
-        if(count!=0){
+        if (count != 0) {
             FragmentManager.BackStackEntry backStackEntry = getActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
             if (backStackEntry.getName().contains(fragment_name)) {
                 getActivity().getSupportFragmentManager().popBackStack();
@@ -152,15 +169,28 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         }
     }
 
-    private void displaySnackbar(String text, String actionName, View.OnClickListener action) {
-//        Snackbar snack = Snackbar.make(findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG)
-//                .setAction(actionName, action);
-//
-//        View v = snack.getView();
-//        v.setBackgroundColor(getResources().getColor(R.color.secondary));
-//        ((TextView) v.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(Color.WHITE);
-//        ((TextView) v.findViewById(android.support.design.R.id.snackbar_action)).setTextColor(Color.BLACK);
-//
-//        snack.show();
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    boolean arama = false;
+    ArrayList<String> list;
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        newText = newText.toLowerCase();
+        list = new ArrayList<>();
+        for (String subject : mathSubjectList) {
+            String dessertName = subject.toLowerCase();
+            if (dessertName.contains(newText)) {
+                list.add(subject);
+            }
+
+        }
+        adapter.setFilter(list);
+        arama = true;
+        return true;
     }
 }

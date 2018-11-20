@@ -46,8 +46,8 @@ public class BellFragment extends Fragment {
         tyt=(TextView)view.findViewById(R.id.tytText);
         ayt=(TextView)view.findViewById(R.id.aytText);
         dateProgress();
-        tyt.setText(tytDate+" gün kaldı.");
-        ayt.setText(aytDate+" gün kaldı.");
+        tyt.setText(tytDate+" gün kaldı");
+        ayt.setText(aytDate+" gün kaldı");
         int animationDuration = 2500;
         circularTyt.setProgressWithAnimation(yuzdeTyt, animationDuration);
         circularAyt.setProgressWithAnimation(yuzdeAyt,animationDuration);

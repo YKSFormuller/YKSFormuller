@@ -13,11 +13,8 @@ import com.yksformuller.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Formula;
-
 public class FormulaAdapter extends RecyclerView.Adapter<FormulaAdapter.FormulaAdapterHolder> {
 
-    //private List<model.Formula> mFormulaList;
     private List<String> mFormulaList;
     Context mContext;
     private LayoutInflater layoutInflater;
@@ -45,7 +42,6 @@ public class FormulaAdapter extends RecyclerView.Adapter<FormulaAdapter.FormulaA
     @Override
     public void onBindViewHolder(FormulaAdapterHolder holder, int position) {
 
-        //model.Formula formula = mFormulaList.get(position);
         holder.title.setText(mFormulaList.get(position));
     }
 
@@ -75,4 +71,9 @@ public class FormulaAdapter extends RecyclerView.Adapter<FormulaAdapter.FormulaA
         return i;
     }
 
+    public void setFilter(ArrayList<String> newList) {
+        mFormulaList = new ArrayList<>();
+        mFormulaList.addAll(newList);
+        notifyDataSetChanged();
+    }
 }
