@@ -1,6 +1,7 @@
 package com.yksformuller.fragment;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -8,9 +9,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.SearchView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -58,6 +61,7 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
         rvMmathList = (RecyclerView) view.findViewById(R.id.mathList);
         searchView = (SearchView) view.findViewById(R.id.searchViewMath);
+       setCustomizeSearchView();
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -93,8 +97,9 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         swipeController = new SwipeController(new SwipeControllerActions() {
             @Override
             public void onRightClicked(int position) {
-                // adapter.players.remove(position);
-                adapter.notifyItemRemoved(position);
+
+                //KAYDET BUTONUNA TIKLANDIĞINDA GİRİLEN YER 
+              //  adapter.notifyItemRemoved(position);
                 adapter.notifyItemRangeChanged(position, adapter.getItemCount());
             }
         });
@@ -192,5 +197,21 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         adapter.setFilter(list);
         arama = true;
         return true;
+    }
+
+    private void setCustomizeSearchView() {
+        int searchSrcTextId = getResources().getIdentifier("android:id/search_src_text", null, null);
+        EditText searchEditText = (EditText) searchView.findViewById(searchSrcTextId);
+        searchEditText.setTextColor(Color.BLACK);
+        searchEditText.setHintTextColor(Color.BLACK);
+
+
+        searchView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchView.onActionViewExpanded();
+            }
+        });
+
     }
 }

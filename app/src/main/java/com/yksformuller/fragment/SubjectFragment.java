@@ -7,9 +7,11 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,16 +30,16 @@ import java.util.List;
 
 import model.Formula;
 
-public class SubjectFragment extends Fragment implements View.OnClickListener, ItemClickListener {
+public class SubjectFragment extends Fragment implements View.OnClickListener, ItemClickListener,SearchView.OnQueryTextListener {
 
     FirebaseDatabase db;
     FormulaAdapter adapter;
     RecyclerView rvSubjectList;
     List<String> SubjectList = new ArrayList<String>();
-    List<Formula> list = new ArrayList<Formula>();
+    List<Formula> formulaList = new ArrayList<Formula>();
     String ders, konu;
     SwipeController swipeController = null;
-
+    SearchView searchView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +54,7 @@ public class SubjectFragment extends Fragment implements View.OnClickListener, I
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_subject, container, false);
         rvSubjectList = (RecyclerView) view.findViewById(R.id.subjectList);
+        searchView=(SearchView)view.findViewById(R.id.searchViewSubject);
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -85,6 +88,7 @@ public class SubjectFragment extends Fragment implements View.OnClickListener, I
             @Override
             public void onRightClicked(int position) {
                 // adapter.players.remove(position);
+                Log.d("button","clicked");
                 adapter.notifyItemRemoved(position);
                 adapter.notifyItemRangeChanged(position, adapter.getItemCount());
             }
@@ -100,6 +104,7 @@ public class SubjectFragment extends Fragment implements View.OnClickListener, I
             }
         });
 
+        searchView.setOnQueryTextListener(this);
 
         adapter.setClickListener(this);
         return view;
@@ -118,7 +123,7 @@ public class SubjectFragment extends Fragment implements View.OnClickListener, I
                     Formula formula = new Formula(formulaName, subjectName, photoUrl);
                     if (subjectName.equals(konu)) {
                         SubjectList.add(formulaName);
-                        list.add(formula);
+                        formulaList.add(formula);
                     }
 
                 }
@@ -141,8 +146,31 @@ public class SubjectFragment extends Fragment implements View.OnClickListener, I
     public void onClick(View view, int position) {
         Intent intent = new Intent(getActivity(), FormulaActivity.class);
         intent.putExtra("formulName", SubjectList.get(position));
-        intent.putExtra("photoURL", list.get(position).getResimurl());
+        intent.putExtra("photoURL", formulaList.get(position).getResimurl());
         getActivity().startActivity(intent);
     }
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
 
+    boolean arama = false;
+    ArrayList<String> list;
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        newText = newText.toLowerCase();
+        list = new ArrayList<>();
+        for (String subject : SubjectList) {
+            String dessertName = subject.toLowerCase();
+            if (dessertName.contains(newText)) {
+                list.add(subject);
+            }
+
+        }
+        adapter.setFilter(list);
+        arama = true;
+        return true;
+    }
 }
