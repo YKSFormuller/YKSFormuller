@@ -32,7 +32,7 @@ import java.util.List;
 
 import model.Formula;
 
-public class MathFragment extends Fragment implements View.OnClickListener, ItemClickListener,SearchView.OnQueryTextListener {
+public class MathFragment extends Fragment implements View.OnClickListener, ItemClickListener, SearchView.OnQueryTextListener {
 
     FirebaseDatabase db;
     FormulaAdapter adapter;
@@ -61,7 +61,7 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
         rvMmathList = (RecyclerView) view.findViewById(R.id.mathList);
         searchView = (SearchView) view.findViewById(R.id.searchViewMath);
-       setCustomizeSearchView();
+        setCustomizeSearchView();
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -99,7 +99,7 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
             public void onRightClicked(int position) {
 
                 //KAYDET BUTONUNA TIKLANDIĞINDA GİRİLEN YER 
-              //  adapter.notifyItemRemoved(position);
+                //  adapter.notifyItemRemoved(position);
                 adapter.notifyItemRangeChanged(position, adapter.getItemCount());
             }
         });
@@ -134,6 +134,11 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
                         mathSubjectList.add(subjectName);
 
                 }
+                for (int i = 4; i <= mathSubjectList.size(); i += 5) {
+                    mathSubjectList.add(i,"");
+
+                }
+
                 adapter.notifyDataSetChanged();
             }
 

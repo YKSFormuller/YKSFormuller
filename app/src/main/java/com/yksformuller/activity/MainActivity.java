@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance();
         args=new Bundle();
         createDateList();
+
+
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         //başlangıç için matematik fragment çağrılıyor.
         getFragment(new MathFragment(), "Matematik");

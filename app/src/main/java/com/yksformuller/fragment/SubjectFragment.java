@@ -127,6 +127,10 @@ public class SubjectFragment extends Fragment implements View.OnClickListener, I
                     }
 
                 }
+                for (int i = 4; i <= SubjectList.size(); i += 5) {
+                    SubjectList.add(i,"");
+
+                }
                 adapter.notifyDataSetChanged();
             }
 

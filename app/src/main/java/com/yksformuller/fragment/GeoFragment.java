@@ -127,6 +127,10 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
 
                     }
                 }
+                for (int i = 4; i <= geoSubjectList.size(); i += 5) {
+                    geoSubjectList.add(i,"");
+
+                }
                 adapter.notifyDataSetChanged();
             }
 
