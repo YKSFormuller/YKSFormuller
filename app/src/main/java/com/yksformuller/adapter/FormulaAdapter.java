@@ -41,38 +41,26 @@ public class FormulaAdapter extends RecyclerView.Adapter<FormulaAdapter.FormulaA
 
     @Override
     public FormulaAdapter.FormulaAdapterHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        FormulaAdapterHolder holder;
+        FormulaAdapterHolder holder=null;
         AdView adview;
 
         if (viewType == CONTENT_TYPE) {
             View view = layoutInflater.inflate(R.layout.formula_item, null);
             holder = new FormulaAdapterHolder(view);
         }
-        else{
-
+        else if(viewType==AD_TYPE){
             adview = new AdView(mContext);
             adview.setAdSize(AdSize.LARGE_BANNER);
-
             adview.setAdUnitId(BANNER_AD_UNIT_ID);
-
             float density = mContext.getResources().getDisplayMetrics().density;
             int height = Math.round(AdSize.LARGE_BANNER.getHeight() * density);
             AbsListView.LayoutParams params = new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, height);
             adview.setLayoutParams(params);
-
             AdRequest request = new AdRequest.Builder().build();
             adview.loadAd(request);
             holder = new FormulaAdapterHolder(adview);
         }
-
-
-
-
-
         return holder;
-
-
-
     }
 
     @Override

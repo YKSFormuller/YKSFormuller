@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yksformuller">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -19,8 +21,10 @@
         </activity>
         <activity
             android:name=".activity.FormulaActivity"
-            android:theme="@style/AppTheme1"></activity>
+            android:theme="@style/AppTheme1" />
+        <activity android:name=".activity.DownloadActivity"
+                  android:theme="@style/AppTheme1">
+        </activity>
     </application>
-
 
 </manifest>

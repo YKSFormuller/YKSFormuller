@@ -1,36 +1,48 @@
 package com.yksformuller.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SearchView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.yksformuller.R;
+import com.yksformuller.activity.FormulaActivity;
+import com.yksformuller.activity.MainActivity;
 import com.yksformuller.adapter.FormulaAdapter;
 import com.yksformuller.Interface.ItemClickListener;
+import com.yksformuller.model.Database;
 import com.yksformuller.model.SwipeController;
 import com.yksformuller.model.SwipeControllerActions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Formula;
+import com.yksformuller.model.Formula;
 
 public class MathFragment extends Fragment implements View.OnClickListener, ItemClickListener, SearchView.OnQueryTextListener {
 
@@ -41,16 +53,32 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
     String fragment_name;
     Bundle args;
     List<String> mathSubjectList = new ArrayList<String>();
+    List<String> list1=new ArrayList<String>();
+    List<Formula>formulaList=new ArrayList<Formula>();
     SearchView searchView;
     SwipeController swipeController = null;
+    FirebaseStorage storage;
+    StorageReference httpsReference;
+    FirebaseAuth mAuth;
+    Database dbSql;
+    String tableName;
+    boolean varmi=false;
+    final long ONE_MEGABYTE = 1024 * 1024;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseDatabase.getInstance();
-
+        dbSql=new Database(getActivity());
+        storage=FirebaseStorage.getInstance();
         createSubjectList();
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
 
+        } else {
+            signInAnonymously();
+        }
 
     }
 
@@ -94,12 +122,31 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         rvMmathList.setLayoutManager(linearLayoutManager);
 
 
-        swipeController = new SwipeController(new SwipeControllerActions() {
+        swipeController = new SwipeController("KAYDET",new SwipeControllerActions() {
             @Override
             public void onRightClicked(int position) {
+                tableName=mathSubjectList.get(position);
+                list1=dbSql.getTable();
+                for(int i=0; i<list1.size(); i++){
+                    if(tableName.equals(list1.get(i))){
+                       varmi=true;
+                    }
+                }
+                if(varmi){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("YKS Formüller");
+                    builder.setMessage("Bu formülleri daha önce kaydettiniz.");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
 
-                //KAYDET BUTONUNA TIKLANDIĞINDA GİRİLEN YER 
-                //  adapter.notifyItemRemoved(position);
+                        }
+                    });
+                    builder.show();
+                }
+                else {
+                    dbSql.addTable(tableName);
+                    dowloadFormula();
+                }
                 adapter.notifyItemRangeChanged(position, adapter.getItemCount());
             }
         });
@@ -129,7 +176,10 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot formulas : dataSnapshot.getChildren()) {
                     String subjectName = formulas.getValue(Formula.class).getKonuAdi();
-
+                    String formulAdi =formulas.getValue(Formula.class).getFormulAdi();
+                    String resimURL=formulas.getValue(Formula.class).getResimurl();
+                    Formula formula=new Formula(formulAdi,subjectName,resimURL);
+                    formulaList.add(formula);
                     if (!mathSubjectList.contains(subjectName))
                         mathSubjectList.add(subjectName);
 
@@ -156,7 +206,6 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
     @Override
     public void onClick(View view, int position) {
-
 
         fragment = new SubjectFragment();
         fragment_name = "Konular";
@@ -218,5 +267,56 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
             }
         });
 
+    }
+    private void signInAnonymously() {
+       mAuth.signInAnonymously().addOnSuccessListener(getActivity(), new OnSuccessListener<AuthResult>() {
+           @Override
+           public void onSuccess(AuthResult authResult) {
+
+           }
+       });
+    }
+    private void dowloadFormula(){
+        DatabaseReference dbFormula = db.getReference("matematik");
+        dbFormula.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot formulas : dataSnapshot.getChildren()) {
+                    final String subjectName = formulas.getValue(Formula.class).getKonuAdi();
+                    final String formulAdi =formulas.getValue(Formula.class).getFormulAdi();
+                    final String resimURL=formulas.getValue(Formula.class).getResimurl();
+                    if(subjectName.equals(tableName)){
+                        httpsReference = storage.getReferenceFromUrl(resimURL);
+                        httpsReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                dbSql.addData(subjectName,formulAdi,bytes);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+
+                            }
+                        });
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("YKS Formüller");
+        builder.setMessage("Formülünüz kaydedildi. İndirilen Formüller bölümünde bulabilirsiniz.");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+            }
+        });
+        builder.show();
     }
 }

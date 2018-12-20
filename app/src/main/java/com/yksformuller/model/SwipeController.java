@@ -30,10 +30,13 @@ public class SwipeController extends Callback {
 
     private SwipeControllerActions buttonsActions = null;
 
+    private String sb="";
+
     private static final float buttonWidth = 200;
 
-    public SwipeController(SwipeControllerActions buttonsActions) {
+    public SwipeController(String sub, SwipeControllerActions buttonsActions) {
         this.buttonsActions = buttonsActions;
+        this.sb=sub;
     }
 
     @Override
@@ -170,7 +173,7 @@ public class SwipeController extends Callback {
         RectF rightButton = new RectF(itemView.getRight() - buttonWidthWithoutPadding - 10, itemView.getTop() + 10, itemView.getRight() - 10, itemView.getBottom() - 10);
         p.setColor(Color.BLUE);
         c.drawRoundRect(rightButton, corners, corners, p);
-        drawText("KAYDET", c, rightButton, p);
+        drawText(sb, c, rightButton, p);
 
         buttonInstance = null;
 

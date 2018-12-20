@@ -1,4 +1,4 @@
-package model;
+package com.yksformuller.model;
 
 public class Formula {
     private String formulAdi, konuAdi, resimurl;

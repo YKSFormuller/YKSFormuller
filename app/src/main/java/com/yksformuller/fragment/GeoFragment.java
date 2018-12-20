@@ -1,8 +1,11 @@
 package com.yksformuller.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -15,14 +18,23 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SearchView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.yksformuller.Interface.ItemClickListener;
 import com.yksformuller.R;
 import com.yksformuller.adapter.FormulaAdapter;
+import com.yksformuller.model.Database;
+import com.yksformuller.model.Formula;
 import com.yksformuller.model.SwipeController;
 import com.yksformuller.model.SwipeControllerActions;
 
@@ -40,12 +52,20 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
     Bundle args;
     SwipeController swipeController = null;
     List<String> geoSubjectList = new ArrayList<String>();
+    List<String> list1=new ArrayList<String>();
+    FirebaseStorage storage;
+    StorageReference httpsReference;
+    Database dbSql;
+    String tableName;
+    boolean varmi=false;
+    final long ONE_MEGABYTE = 1024 * 1024;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseDatabase.getInstance();
-
+        dbSql=new Database(getActivity());
+        storage=FirebaseStorage.getInstance();
         createSubjectList();
     }
 
@@ -86,10 +106,31 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rvGeoList.setLayoutManager(linearLayoutManager);
 
-        swipeController = new SwipeController(new SwipeControllerActions() {
+        swipeController = new SwipeController("KAYDET",new SwipeControllerActions() {
             @Override
             public void onRightClicked(int position) {
-                adapter.notifyItemRemoved(position);
+                tableName=geoSubjectList.get(position);
+                list1=dbSql.getTable();
+                for(int i=0; i<list1.size(); i++){
+                    if(tableName.equals(list1.get(i))){
+                        varmi=true;
+                    }
+                }
+                if(varmi){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("YKS Formüller");
+                    builder.setMessage("Bu formülleri daha önce kaydettiniz.");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+
+                        }
+                    });
+                    builder.show();
+                }
+                else {
+                    dbSql.addTable(tableName);
+                    dowloadFormula();
+                }
                 adapter.notifyItemRangeChanged(position, adapter.getItemCount());
             }
         });
@@ -121,7 +162,7 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot formulas : dataSnapshot.getChildren()) {
-                    String subjectName = formulas.getValue(model.Formula.class).getKonuAdi();
+                    String subjectName = formulas.getValue(Formula.class).getKonuAdi();
                     if (!geoSubjectList.contains(subjectName)) {
                         geoSubjectList.add(subjectName);
 
@@ -208,5 +249,49 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
             }
         });
 
+    }
+
+    private void dowloadFormula(){
+        DatabaseReference dbFormula = db.getReference("geometri");
+        dbFormula.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot formulas : dataSnapshot.getChildren()) {
+                    final String subjectName = formulas.getValue(Formula.class).getKonuAdi();
+                    final String formulAdi =formulas.getValue(Formula.class).getFormulAdi();
+                    final String resimURL=formulas.getValue(Formula.class).getResimurl();
+                    if(subjectName.equals(tableName)){
+                        httpsReference = storage.getReferenceFromUrl(resimURL);
+                        httpsReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                dbSql.addData(subjectName,formulAdi,bytes);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+
+                            }
+                        });
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("YKS Formüller");
+        builder.setMessage("Formülünüz kaydedildi. İndirilen Formüller bölümünde bulabilirsiniz.");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+            }
+        });
+        builder.show();
     }
 }
