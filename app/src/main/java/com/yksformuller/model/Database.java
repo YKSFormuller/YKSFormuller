@@ -95,6 +95,19 @@ public class Database  extends SQLiteOpenHelper{
         db.close();
     }
 
+    public boolean isEmpty(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master where tbl_name = '"+TABLE_NAME_1+"'", null);
+        if(cursor!=null) {
+            if(cursor.getCount()>0) {
+                cursor.close();
+                return true;
+            }
+            cursor.close();
+        }
+        return false;
+    }
+
     public List<String> getTable(){
         list=new ArrayList<String>();
         String selectQuery = "SELECT * FROM " + TABLE_NAME_1;
