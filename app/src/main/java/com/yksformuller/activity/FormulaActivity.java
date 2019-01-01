@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -46,7 +48,7 @@ public class FormulaActivity extends AppCompatActivity {
     List<DownloadData> list=new ArrayList<DownloadData>();
     boolean varmi=false;
     final long ONE_MEGABYTE = 1024 * 1024;
-
+    private AdView mAdView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +61,10 @@ public class FormulaActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         dbSql=new Database(this);
         FirebaseUser user = mAuth.getCurrentUser();
+
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         PhotoViewAttacher photoViewAttacher=new PhotoViewAttacher(photoURL);
         photoViewAttacher.update();
