@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -58,6 +59,10 @@ public class FormulaActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         dbSql=new Database(this);
         FirebaseUser user = mAuth.getCurrentUser();
+
+        PhotoViewAttacher photoViewAttacher=new PhotoViewAttacher(photoURL);
+        photoViewAttacher.update();
+
         if (user != null) {
 
         } else {

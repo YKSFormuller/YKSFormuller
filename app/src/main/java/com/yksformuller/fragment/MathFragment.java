@@ -1,9 +1,11 @@
 package com.yksformuller.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -12,11 +14,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -53,8 +59,8 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
     String fragment_name;
     Bundle args;
     List<String> mathSubjectList = new ArrayList<String>();
-    List<String> list1=new ArrayList<String>();
-    List<Formula>formulaList=new ArrayList<Formula>();
+    List<String> list1 = new ArrayList<String>();
+    List<Formula> formulaList = new ArrayList<Formula>();
     SearchView searchView;
     SwipeController swipeController = null;
     FirebaseStorage storage;
@@ -62,15 +68,17 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
     FirebaseAuth mAuth;
     Database dbSql;
     String tableName;
-    boolean varmi=false;
+    boolean varmi = false;
     final long ONE_MEGABYTE = 1024 * 1024;
+    ImageView imgOffline;
+    TextView txtOffline;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseDatabase.getInstance();
-        dbSql=new Database(getActivity());
-        storage=FirebaseStorage.getInstance();
+        dbSql = new Database(getActivity());
+        storage = FirebaseStorage.getInstance();
         createSubjectList();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
@@ -82,6 +90,12 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
     }
 
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 
@@ -89,6 +103,19 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
 
         rvMmathList = (RecyclerView) view.findViewById(R.id.mathList);
         searchView = (SearchView) view.findViewById(R.id.searchViewMath);
+        imgOffline = (ImageView) view.findViewById(R.id.imgOffline);
+        txtOffline = (TextView) view.findViewById(R.id.txtOffline);
+
+        if (!isNetworkConnected()) {
+            imgOffline.setVisibility(View.VISIBLE);
+            txtOffline.setVisibility(View.VISIBLE);
+            rvMmathList.setVisibility(View.GONE);
+        }else{
+            imgOffline.setVisibility(View.GONE);
+            txtOffline.setVisibility(View.GONE);
+            rvMmathList.setVisibility(View.VISIBLE);
+        }
+
         setCustomizeSearchView();
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -122,17 +149,17 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         rvMmathList.setLayoutManager(linearLayoutManager);
 
 
-        swipeController = new SwipeController("KAYDET",new SwipeControllerActions() {
+        swipeController = new SwipeController("KAYDET", new SwipeControllerActions() {
             @Override
             public void onRightClicked(int position) {
-                tableName=mathSubjectList.get(position);
-                list1=dbSql.getTable();
-                for(int i=0; i<list1.size(); i++){
-                    if(tableName.equals(list1.get(i))){
-                       varmi=true;
+                tableName = mathSubjectList.get(position);
+                list1 = dbSql.getTable();
+                for (int i = 0; i < list1.size(); i++) {
+                    if (tableName.equals(list1.get(i))) {
+                        varmi = true;
                     }
                 }
-                if(varmi){
+                if (varmi) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle("YKS Formüller");
                     builder.setMessage("Bu formülleri daha önce kaydettiniz.");
@@ -142,8 +169,7 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
                         }
                     });
                     builder.show();
-                }
-                else {
+                } else {
                     dbSql.addTable(tableName);
                     dowloadFormula();
                 }
@@ -176,16 +202,16 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot formulas : dataSnapshot.getChildren()) {
                     String subjectName = formulas.getValue(Formula.class).getKonuAdi();
-                    String formulAdi =formulas.getValue(Formula.class).getFormulAdi();
-                    String resimURL=formulas.getValue(Formula.class).getResimurl();
-                    Formula formula=new Formula(formulAdi,subjectName,resimURL);
+                    String formulAdi = formulas.getValue(Formula.class).getFormulAdi();
+                    String resimURL = formulas.getValue(Formula.class).getResimurl();
+                    Formula formula = new Formula(formulAdi, subjectName, resimURL);
                     formulaList.add(formula);
                     if (!mathSubjectList.contains(subjectName))
                         mathSubjectList.add(subjectName);
 
                 }
                 for (int i = 4; i <= mathSubjectList.size(); i += 5) {
-                    mathSubjectList.add(i,"");
+                    mathSubjectList.add(i, "");
 
                 }
 
@@ -268,29 +294,31 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
         });
 
     }
-    private void signInAnonymously() {
-       mAuth.signInAnonymously().addOnSuccessListener(getActivity(), new OnSuccessListener<AuthResult>() {
-           @Override
-           public void onSuccess(AuthResult authResult) {
 
-           }
-       });
+    private void signInAnonymously() {
+        mAuth.signInAnonymously().addOnSuccessListener(getActivity(), new OnSuccessListener<AuthResult>() {
+            @Override
+            public void onSuccess(AuthResult authResult) {
+
+            }
+        });
     }
-    private void dowloadFormula(){
+
+    private void dowloadFormula() {
         DatabaseReference dbFormula = db.getReference("matematik");
         dbFormula.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot formulas : dataSnapshot.getChildren()) {
                     final String subjectName = formulas.getValue(Formula.class).getKonuAdi();
-                    final String formulAdi =formulas.getValue(Formula.class).getFormulAdi();
-                    final String resimURL=formulas.getValue(Formula.class).getResimurl();
-                    if(subjectName.equals(tableName)){
+                    final String formulAdi = formulas.getValue(Formula.class).getFormulAdi();
+                    final String resimURL = formulas.getValue(Formula.class).getResimurl();
+                    if (subjectName.equals(tableName)) {
                         httpsReference = storage.getReferenceFromUrl(resimURL);
                         httpsReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                             @Override
                             public void onSuccess(byte[] bytes) {
-                                dbSql.addData(subjectName,formulAdi,bytes);
+                                dbSql.addData(subjectName, formulAdi, bytes);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -318,5 +346,20 @@ public class MathFragment extends Fragment implements View.OnClickListener, Item
             }
         });
         builder.show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (!isNetworkConnected()) {
+            imgOffline.setVisibility(View.VISIBLE);
+            txtOffline.setVisibility(View.VISIBLE);
+            rvMmathList.setVisibility(View.GONE);
+        }else{
+            imgOffline.setVisibility(View.GONE);
+            txtOffline.setVisibility(View.GONE);
+            rvMmathList.setVisibility(View.VISIBLE);
+        }
     }
 }

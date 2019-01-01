@@ -12,15 +12,15 @@
         android:layout_width="0dp"
         android:layout_height="41dp"
         android:layout_alignParentTop="true"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/background"
         android:closeIcon="@drawable/cancel_icon"
         android:queryBackground="@android:color/transparent"
-        android:searchIcon="@drawable/search_icon"
+        android:searchIcon="@drawable/search_icon2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,10 +32,50 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchViewMath"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintVertical_bias="0.0"
+        android:layout_marginBottom="50dp">
 
     </android.support.v7.widget.RecyclerView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout_editor_absoluteX="0dp"
+        tools:ignore="MissingConstraints">
+
+        <ImageView
+            android:id="@+id/imgOffline"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/offline"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/txtOffline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="240dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:text="ŞU ANDA İNTERNETE BAĞLI DEĞİLSİNİZ,\nSADECE İNDİRDİĞİNİZ FORMULLERE ULAŞABİLİRSİNİZ"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="16sp"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+
+
 
 </android.support.constraint.ConstraintLayout>

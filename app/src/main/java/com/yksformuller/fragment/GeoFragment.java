@@ -1,9 +1,11 @@
 package com.yksformuller.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -16,7 +18,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -59,6 +63,8 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
     String tableName;
     boolean varmi=false;
     final long ONE_MEGABYTE = 1024 * 1024;
+    ImageView imgOffline;
+    TextView txtOffline;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,6 +81,19 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
         View view = inflater.inflate(R.layout.fragment_geo, parent, false);
         rvGeoList = (RecyclerView) view.findViewById(R.id.geoList);
         searchView = (SearchView) view.findViewById(R.id.searchViewGeo);
+        imgOffline = (ImageView) view.findViewById(R.id.imgOfflineGeo);
+        txtOffline = (TextView) view.findViewById(R.id.txtOfflineGeo);
+
+        if (!isNetworkConnected()) {
+            imgOffline.setVisibility(View.VISIBLE);
+            txtOffline.setVisibility(View.VISIBLE);
+            rvGeoList.setVisibility(View.GONE);
+        }else{
+            imgOffline.setVisibility(View.GONE);
+            txtOffline.setVisibility(View.GONE);
+            rvGeoList.setVisibility(View.VISIBLE);
+        }
+
         setCustomizeSearchView();
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -199,7 +218,7 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         //fragment değişimi gerçekleştiriliyor.
         transaction.replace(R.id.container, fragment).commit();
-        //stackteki fragment sayısı
+//        //stackteki fragment sayısı
         int count = getActivity().getSupportFragmentManager().getBackStackEntryCount();
         //stackte birden fazla fragment birikmesini önlüyor.
         if (count != 0) {
@@ -293,5 +312,24 @@ public class GeoFragment extends Fragment implements View.OnClickListener, ItemC
             }
         });
         builder.show();
+    }
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!isNetworkConnected()) {
+            imgOffline.setVisibility(View.VISIBLE);
+            txtOffline.setVisibility(View.VISIBLE);
+            rvGeoList.setVisibility(View.GONE);
+        }else{
+            imgOffline.setVisibility(View.GONE);
+            txtOffline.setVisibility(View.GONE);
+            rvGeoList.setVisibility(View.VISIBLE);
+        }
     }
 }

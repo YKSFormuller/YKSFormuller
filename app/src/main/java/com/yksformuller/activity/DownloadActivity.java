@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.yksformuller.R;
 
 import butterknife.BindView;
@@ -29,6 +30,9 @@ public class DownloadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_download);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ButterKnife.bind(this);
+        PhotoViewAttacher photoViewAttacher=new PhotoViewAttacher(photoURL);
+        photoViewAttacher.update();
+
         showFormula();
     }
 
