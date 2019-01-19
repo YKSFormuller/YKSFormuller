@@ -5,4 +5,8 @@
     <color name="colorAccent">#1E90FF</color>
     <color name="colorBack">#E3E3E3</color>
     <color name="colorProgress">#1E90FF</color>
+
+    <color name="book_loading_background">#E3E3E3</color>
+    <color name="book_loading_book">#00a0f7</color>
+    <color name="book_loading_page">#0072c4</color>
 </resources>

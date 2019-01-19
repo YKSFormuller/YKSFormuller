@@ -4,12 +4,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.victor.loading.book.BookLoading;
 import com.yksformuller.R;
 import com.yksformuller.model.Database;
 import com.yksformuller.model.DownloadData;
@@ -40,6 +43,7 @@ public class FormulaActivity extends AppCompatActivity {
     TextView formulName;
     @BindView(R.id.photoURL)
     ImageView photoURL;
+    private BookLoading bookLoading;
     FirebaseStorage storage;
     StorageReference storageRef;
     StorageReference httpsReference;
@@ -55,7 +59,17 @@ public class FormulaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_formula);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ButterKnife.bind(this);
-        showFormula();
+        bookLoading= (BookLoading) findViewById(R.id.bookloading);
+        bookLoading.start();
+        Handler h=new Handler();
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bookLoading.stop();
+                bookLoading.setVisibility(View.INVISIBLE);
+                showFormula();
+            }
+        },2500);
         storage=FirebaseStorage.getInstance();
         storageRef = storage.getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -77,8 +91,9 @@ public class FormulaActivity extends AppCompatActivity {
     }
     private void showFormula() {
         Intent intent=getIntent();
+        final String imageurl = intent.getStringExtra("photoURL");
         formulName.setText(intent.getStringExtra("formulName"));
-        Glide.with(this).load(intent.getStringExtra("photoURL")).into(photoURL);
+        Glide.with(this).load(imageurl).into(photoURL);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
